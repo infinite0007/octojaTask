@@ -33,6 +33,77 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Beispieldaten beim ersten Start einmalig einfügen
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OctojaDbContext>();
+
+    if (!await db.Kunden.AnyAsync())
+    {
+        db.Kunden.AddRange(
+            new Kunde
+            {
+                Name = "Musterbau GmbH",
+                Email = "info@musterbau.de",
+                Telefon = "+49 89 123456",
+                Strasse = "Musterstraße 12",
+                Plz = "80331",
+                Ort = "München",
+                Contacts =
+                [
+                    new Ansprechpartner
+                    {
+                        FirstName = "Anna",
+                        LastName = "Schneider",
+                        Role = "Geschäftsführung",
+                        Email = "anna.schneider@musterbau.de",
+                        Telefon = "+49 89 123457"
+                    },
+                    new Ansprechpartner
+                    {
+                        FirstName = "Markus",
+                        LastName = "Weber",
+                        Role = "Einkauf",
+                        Email = "markus.weber@musterbau.de",
+                        Telefon = "+49 89 123458"
+                    }
+                ]
+            },
+            new Kunde
+            {
+                Name = "Tech Solutions GmbH",
+                Email = "kontakt@tech-solutions.de",
+                Telefon = "+49 711 987654",
+                Strasse = "Innovationsallee 8",
+                Plz = "70173",
+                Ort = "Stuttgart",
+                Contacts =
+                [
+                    new Ansprechpartner
+                    {
+                        FirstName = "Laura",
+                        LastName = "Fischer",
+                        Role = "Projektleitung",
+                        Email = "laura.fischer@tech-solutions.de",
+                        Telefon = "+49 711 987655"
+                    }
+                ]
+            },
+            new Kunde
+            {
+                Name = "Alpenblick Handel KG",
+                Email = "info@alpenblick-handel.de",
+                Telefon = "+49 831 456789",
+                Strasse = "Bahnhofplatz 4",
+                Plz = "87435",
+                Ort = "Kempten"
+            }
+        );
+
+        await db.SaveChangesAsync();
+    }
+}
+
 
 if (app.Environment.IsDevelopment())
 {
