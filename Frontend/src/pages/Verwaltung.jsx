@@ -301,9 +301,6 @@ function Verwaltung() {
                   <div className="d-flex flex-wrap justify-content-between gap-3">
                     <div className="d-flex gap-3">
                       <div>
-                        {selectedCustomer.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
                         <div className="small text-body-secondary mb-1">
                           KUNDENPROFIL
                         </div>
