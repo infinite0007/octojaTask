@@ -8,7 +8,11 @@ function Footer() {
       <Container className="footer-inner">
         <div>
           <Link to="/" className="footer-brand">
-            <span className="brand-mark">O</span>
+            <img
+              src="/favicon.svg"
+              alt="Octoja Logo"
+              className="brand-logo"
+            />
             Octoja
           </Link>
           <p className="footer-note">
