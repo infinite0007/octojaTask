@@ -1,6 +1,8 @@
 
 using Microsoft.EntityFrameworkCore;
 using Octoja.Api.Data;
+using Octoja.Api.Dtos;
+using Octoja.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
