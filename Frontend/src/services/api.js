@@ -46,4 +46,24 @@ export const api = {
     request(`/kunden/${id}`, {
       method: "DELETE",
     }),
+
+  getContacts: (customerId) =>
+    request(`/kunden/${customerId}/ansprechpartner`),
+
+  createContact: (customerId, contact) =>
+    request(`/kunden/${customerId}/ansprechpartner`, {
+      method: "POST",
+      body: JSON.stringify(contact),
+    }),
+
+  updateContact: (id, contact) =>
+    request(`/ansprechpartner/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(contact),
+    }),
+
+  deleteContact: (id) =>
+    request(`/ansprechpartner/${id}`, {
+      method: "DELETE",
+    }),
 };
