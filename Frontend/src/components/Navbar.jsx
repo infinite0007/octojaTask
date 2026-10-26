@@ -10,9 +10,14 @@ function Navbar() {
   return (
     <BootstrapNavbar expand="lg" className="app-navbar">
       <Container>
+        
         <BootstrapNavbar.Brand as={Link} to="/" className="brand">
-          <span className="brand-mark">O</span>
-          <span>Octoja</span>
+        <img
+            src="/favicon.svg"
+            alt="Octoja Logo"
+            className="brand-logo"
+        />
+        <span>Octoja</span>
         </BootstrapNavbar.Brand>
 
         <BootstrapNavbar.Toggle aria-controls="octoja-nav" />
