@@ -28,19 +28,6 @@
   font-weight: 800;
 }
 
-.brand-mark {
-  width: 38px;
-  height: 38px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 12px;
-  background: var(--purple-dark);
-  color: #fff;
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
 .app-navbar .nav-link {
   padding: 0.65rem 0.85rem;
   border-radius: 10px;
@@ -211,6 +198,15 @@
   font-size: 0.86rem;
 }
 
+.customer-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.customer-row {
+  margin: 0;
+}
+
 .visual-avatar {
   width: 39px;
   height: 39px;
@@ -223,15 +219,6 @@
   font-weight: 800;
 }
 
-.avatar-purple {
-  background: var(--accent-soft);
-  color: var(--purple);
-}
-
-.avatar-blue {
-  background: #e4efff;
-  color: #3268b4;
-}
 
 .visual-muted {
   margin-top: 0.2rem;

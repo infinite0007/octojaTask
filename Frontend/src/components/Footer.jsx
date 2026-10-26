@@ -26,7 +26,6 @@ function Footer() {
                 href="https://de.linkedin.com/in/julian-lingnau-05b623162"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="footer-link"
             >
                 Julian Lingnau
             </a>{" "}

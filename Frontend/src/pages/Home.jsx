@@ -25,7 +25,7 @@ const features = [
 
 function Home() {
   return (
-    <div className="home-page">
+    <div>
       <section className="home-hero">
         <Container>
           <Row className="align-items-center g-5">
@@ -95,7 +95,7 @@ function Home() {
                     </div>
 
                     <div className="visual-customer">
-                      <div className="visual-avatar avatar-purple">MB</div>
+                      <div className="visual-avatar">MB</div>
                       <div className="flex-grow-1">
                         <div className="fw-bold">Musterbau GmbH</div>
                         <div className="visual-muted">München</div>
@@ -104,7 +104,7 @@ function Home() {
                     </div>
 
                     <div className="visual-contact">
-                      <div className="visual-avatar avatar-blue">TS</div>
+                      <div className="visual-avatar">TS</div>
                       <div className="flex-grow-1">
                         <div className="fw-bold">Tech Solutions GmbH</div>
                         <div className="visual-muted">Stuttgart</div>

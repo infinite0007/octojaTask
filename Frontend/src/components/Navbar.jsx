@@ -11,7 +11,7 @@ function Navbar() {
     <BootstrapNavbar expand="lg" className="app-navbar">
       <Container>
         
-        <BootstrapNavbar.Brand as={Link} to="/" className="brand">
+        <BootstrapNavbar.Brand as={Link} to="/">
         <img
             src="/favicon.svg"
             alt="Octoja Logo"
