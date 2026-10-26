@@ -33,10 +33,13 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Beispieldaten beim ersten Start einmalig einfügen
+// Datenbanktabellen beim ersten Start erstellen
+// Beispieldaten nur einfügen, wenn noch keine Kunden existieren
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<OctojaDbContext>();
+
+    await db.Database.EnsureCreatedAsync();
 
     if (!await db.Kunden.AnyAsync())
     {
