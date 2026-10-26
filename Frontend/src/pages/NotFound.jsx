@@ -1,7 +1,7 @@
 
 import { Button, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
-import UFO from "../assets/UFO404.svg";
+import UFO from "../assets/UFO404.svg"; // Geholt und gefunden auf: https://lottiefiles.com/free-animation/ufo-404-Nj3rN5178E
 
 function NotFound() {
   return (
