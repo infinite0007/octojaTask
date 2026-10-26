@@ -2,7 +2,26 @@
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-
+const features = [
+  {
+    icon: "01",
+    title: "Kunden verwalten",
+    description:
+      "Kunden zentral erfassen, Kontaktdaten pflegen und Informationen jederzeit wiederfinden.",
+  },
+  {
+    icon: "02",
+    title: "Ansprechpartner zuordnen",
+    description:
+      "Jedem Kunden können mehrere Ansprechpartner mit eigenen Kontaktdaten zugeordnet werden.",
+  },
+  {
+    icon: "03",
+    title: "Einfach den Überblick behalten",
+    description:
+      "Mit Suche, übersichtlichen Listen und klaren Kundenbeziehungen schnell zum gewünschten Eintrag.",
+  },
+];
 
 function Home() {
   return (
@@ -113,7 +132,105 @@ function Home() {
         </Container>
       </section>
 
-      
+      <section id="funktionen" className="features-section">
+        <Container>
+          <div className="section-intro text-center">
+            <div className="eyebrow">Weniger Aufwand. Mehr Übersicht.</div>
+            <h2>Alles Wichtige an einem Ort.</h2>
+            <p>
+              Die Funktionen, die du für eine übersichtliche Kundenverwaltung
+              wirklich brauchst.
+            </p>
+          </div>
+
+          <Row className="g-4">
+            {features.map((feature) => (
+              <Col md={6} lg={4} key={feature.title}>
+                <Card className="feature-card h-100">
+                  <Card.Body className="p-4 p-lg-4">
+                    <div className="feature-number">{feature.icon}</div>
+                    <h3>{feature.title}</h3>
+                    <p>{feature.description}</p>
+                  </Card.Body>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </Container>
+      </section>
+
+      <section className="relationship-section">
+        <Container>
+          <Row className="align-items-center g-4">
+            <Col lg={7}>
+              <div className="eyebrow">Saubere Datenstruktur</div>
+              <h2>Ein Kunde. Mehrere Ansprechpartner.</h2>
+              <p>
+                Jeder Ansprechpartner gehört genau zu einem Kunden. So bleiben
+                Kontaktinformationen zugeordnet und Kundenbeziehungen klar
+                nachvollziehbar.
+              </p>
+            </Col>
+
+            <Col lg={5}>
+              <div className="relationship-card">
+                <div className="relationship-node main-node">
+                  <span className="relationship-icon">▤</span>
+                  <div>
+                    <div className="fw-bold">Kunde</div>
+                    <div className="visual-muted">Musterbau GmbH</div>
+                  </div>
+                </div>
+
+                <div className="relationship-connector">
+                  <span>1</span>
+                  <div />
+                  <span>N</span>
+                </div>
+
+                <div className="relationship-children">
+                  <div className="relationship-node">
+                    <span className="relationship-icon">♙</span>
+                    <div>
+                      <div className="fw-bold">Anna Schneider</div>
+                      <div className="visual-muted">Geschäftsführung</div>
+                    </div>
+                  </div>
+
+                  <div className="relationship-node">
+                    <span className="relationship-icon">♙</span>
+                    <div>
+                      <div className="fw-bold">Markus Weber</div>
+                      <div className="visual-muted">Einkauf</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </section>
+
+      <section className="home-cta">
+        <Container>
+          <div className="cta-panel">
+            <div>
+              <div className="eyebrow">Bereit?</div>
+              <h2>Bring Ordnung in deine Kundenkontakte.</h2>
+              <p>Starte direkt mit der Verwaltung deiner Kunden.</p>
+            </div>
+            <Button
+              as={Link}
+              to="/verwaltung"
+              variant="light"
+              size="lg"
+              className="cta-button"
+            >
+              Zur Verwaltung <span aria-hidden="true">→</span>
+            </Button>
+          </div>
+        </Container>
+      </section>
     </div>
   );
 }
