@@ -1,111 +1,215 @@
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  font-family: "Segoe UI", system-ui, sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --purple: #8053c9;
+  --purple-dark: #6638b6;
 }
 
+/* Helles Design als Standard */
+:root {
+  color-scheme: light;
+  --bg: #f8f8fc;
+  --surface: #ffffff;
+  --text: #242333;
+  --muted: #77758a;
+  --border: #e7e4ef;
+  --accent-soft: #eee7fa;
+  --success-soft: #e3f7ec;
+  --success-text: #187447;
+  --shadow: 0 8px 28px rgb(34 24 54 / 5%);
+}
+
+/* Dunkles Design automatisch bei dunkler Systemeinstellung */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #15151c;
+    --surface: #20202a;
+    --text: #f2f0f8;
+    --muted: #aaa6bb;
+    --border: #363441;
+    --accent-soft: #332647;
+    --success-soft: #173a2c;
+    --success-text: #a7ebc4;
+    --shadow: 0 8px 28px rgb(0 0 0 / 15%);
   }
 }
 
-body {
-  margin: 0;
+/* Ermöglicht bei Bedarf ein explizit helles oder dunkles Design */
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #15151c;
+  --surface: #20202a;
+  --text: #f2f0f8;
+  --muted: #aaa6bb;
+  --border: #363441;
+  --accent-soft: #332647;
+  --success-soft: #173a2c;
+  --success-text: #a7ebc4;
+  --shadow: 0 8px 28px rgb(0 0 0 / 15%);
+}
+
+/* Bootstrap-Variablen mit unserem Design verbinden */
+:root {
+  --bs-body-color: var(--text);
+  --bs-body-bg: var(--bg);
+  --bs-border-color: var(--border);
+  --bs-secondary-color: var(--muted);
+  --bs-tertiary-bg: var(--surface);
+  --bs-emphasis-color: var(--text);
+  --bs-link-color: var(--purple);
+  --bs-link-hover-color: var(--purple-dark);
+  --bs-card-bg: var(--surface);
+  --bs-card-color: var(--text);
+  --bs-modal-bg: var(--surface);
+  --bs-modal-color: var(--text);
+  --bs-dropdown-bg: var(--surface);
+  --bs-dropdown-color: var(--text);
+  --bs-table-bg: var(--surface);
+  --bs-table-color: var(--text);
+}
+
+* {
   box-sizing: border-box;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
+html,
+body,
+#root {
+  min-height: 100%;
   margin: 0;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
+html {
+  scroll-behavior: smooth;
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+body {
+  min-width: 320px;
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--text);
+}
+
+a {
+  text-decoration: none;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+::selection {
+  color: #fff;
+  background: var(--purple);
+}
+
+/* Bootstrap-Komponenten */
+.card,
+.modal-content,
+.dropdown-menu,
+.list-group-item,
+.popover,
+.offcanvas {
+  color: var(--text);
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+.navbar {
+  --bs-navbar-color: var(--muted);
+  --bs-navbar-hover-color: var(--purple);
+  --bs-navbar-active-color: var(--purple);
+  --bs-navbar-brand-color: var(--text);
+  --bs-navbar-brand-hover-color: var(--purple);
+}
+
+.table {
+  --bs-table-color: var(--text);
+  --bs-table-bg: var(--surface);
+  --bs-table-border-color: var(--border);
+  --bs-table-striped-color: var(--text);
+  --bs-table-striped-bg: var(--bg);
+  --bs-table-hover-color: var(--text);
+  --bs-table-hover-bg: var(--accent-soft);
+}
+
+.form-control,
+.form-select,
+.input-group-text {
+  color: var(--text);
+  background-color: var(--surface);
+  border-color: var(--border);
+}
+
+.form-control::placeholder {
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+.form-control:focus,
+.form-select:focus {
+  color: var(--text);
+  background-color: var(--surface);
+  border-color: var(--purple);
+  box-shadow: 0 0 0 0.2rem rgb(128 83 201 / 16%);
+}
+
+.form-control:disabled,
+.form-select:disabled {
+  background-color: var(--bg);
+}
+
+.dropdown-item {
+  color: var(--text);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+  color: var(--text);
+  background-color: var(--accent-soft);
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--purple-dark);
+  --bs-btn-border-color: var(--purple-dark);
+  --bs-btn-hover-bg: #512b94;
+  --bs-btn-hover-border-color: #512b94;
+  --bs-btn-active-bg: #45247f;
+  --bs-btn-active-border-color: #45247f;
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--purple);
+  --bs-btn-border-color: var(--purple);
+  --bs-btn-hover-bg: var(--purple-dark);
+  --bs-btn-hover-border-color: var(--purple-dark);
+  --bs-btn-hover-color: #fff;
+}
+
+.text-body-secondary {
+  color: var(--muted) !important;
+}
+
+.border {
+  border-color: var(--border) !important;
 }
