@@ -17,7 +17,16 @@ function Footer() {
         </div>
 
         <div className="footer-copy">
-          Kundenverwaltung von Julian Lingnau © {new Date().getFullYear()} Octoja
+            Kundenverwaltung von{" "}
+            <a
+                href="https://de.linkedin.com/in/julian-lingnau-05b623162"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="footer-link"
+            >
+                Julian Lingnau
+            </a>{" "}
+            © {new Date().getFullYear()} Octoja
         </div>
       </Container>
     </footer>
