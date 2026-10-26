@@ -1,5 +1,5 @@
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Badge,
@@ -14,27 +14,48 @@ import {
 } from "react-bootstrap";
 
 import CustomerModal from "../components/CustomerModal";
-import { demoData } from "../data/DemoData";
-
-function createId() {
-  return Date.now() + Math.floor(Math.random() * 1000);
-}
-
-function getInitials(firstName = "", lastName = "") {
-  return `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
-}
+import { api } from "../services/api";
 
 function Verwaltung() {
-  const [customers, setCustomers] = useState(demoData);
+  const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectedCustomerId, setSelectedCustomerId] = useState(
-    demoData[0]?.id ?? null,
-  );
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const [modal, setModal] = useState({
     show: false,
     type: "customer",
     initialData: null,
   });
+
+  // Kunden beim Öffnen der Seite aus der Datenbank laden
+  async function loadCustomers() {
+    const data = await api.getCustomers();
+    setCustomers(data);
+    return data;
+  }
+
+  useEffect(() => {
+    async function initialize() {
+      try {
+        const data = await loadCustomers();
+
+        if (data.length > 0) {
+          setSelectedCustomerId(data[0].id);
+        }
+      } catch (err) {
+        setError(
+          `Kunden konnten nicht geladen werden: ${err.message}`
+        );
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initialize();
+  }, []);
 
   const filteredCustomers = useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -48,7 +69,7 @@ function Verwaltung() {
         customer.telefon,
         customer.ort,
         customer.plz,
-        ...customer.contacts.flatMap((contact) => [
+        ...(customer.contacts ?? []).flatMap((contact) => [
           contact.firstName,
           contact.lastName,
           contact.email,
@@ -64,9 +85,12 @@ function Verwaltung() {
   }, [customers, search]);
 
   const selectedCustomer =
-    customers.find((customer) => customer.id === selectedCustomerId) ?? null;
+    customers.find(
+      (customer) => customer.id === selectedCustomerId
+    ) ?? null;
 
   function openModal(type, initialData = null) {
+    setError("");
     setModal({ show: true, type, initialData });
   }
 
@@ -74,98 +98,102 @@ function Verwaltung() {
     setModal((current) => ({ ...current, show: false }));
   }
 
-  function saveCustomerOrContact(formData) {
+  // Kunden und Ansprechpartner über die API speichern
+  async function saveCustomerOrContact(formData) {
     const { type, initialData } = modal;
 
-    if (type === "customer") {
-      if (initialData) {
-        setCustomers((current) =>
-          current.map((customer) =>
-            customer.id === initialData.id
-              ? { ...customer, ...formData, contacts: customer.contacts }
-              : customer,
-          ),
+    setSaving(true);
+    setError("");
+
+    try {
+      if (type === "customer") {
+        let savedCustomer;
+
+        if (initialData) {
+          savedCustomer = await api.updateCustomer(
+            initialData.id,
+            formData
+          );
+        } else {
+          savedCustomer = await api.createCustomer(formData);
+        }
+
+        const updatedCustomers = await loadCustomers();
+
+        setSelectedCustomerId(
+          savedCustomer.id ??
+          initialData?.id ??
+          updatedCustomers[0]?.id ??
+          null
         );
       } else {
-        const newCustomer = {
-          ...formData,
-          id: createId(),
-          contacts: [],
-        };
+        if (selectedCustomerId === null) {
+          throw new Error("Bitte zuerst einen Kunden auswählen.");
+        }
 
-        setCustomers((current) => [...current, newCustomer]);
-        setSelectedCustomerId(newCustomer.id);
-      }
-    } else if (selectedCustomerId !== null) {
-      if (initialData) {
-        setCustomers((current) =>
-          current.map((customer) =>
-            customer.id === selectedCustomerId
-              ? {
-                  ...customer,
-                  contacts: customer.contacts.map((contact) =>
-                    contact.id === initialData.id
-                      ? { ...contact, ...formData }
-                      : contact,
-                  ),
-                }
-              : customer,
-          ),
-        );
-      } else {
-        const newContact = { ...formData, id: createId() };
+        if (initialData) {
+          await api.updateContact(initialData.id, formData);
+        } else {
+          await api.createContact(selectedCustomerId, formData);
+        }
 
-        setCustomers((current) =>
-          current.map((customer) =>
-            customer.id === selectedCustomerId
-              ? {
-                  ...customer,
-                  contacts: [...customer.contacts, newContact],
-                }
-              : customer,
-          ),
-        );
+        await loadCustomers();
       }
+
+      closeModal();
+    } catch (err) {
+      setError(`Speichern fehlgeschlagen: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
-
-    closeModal();
   }
 
-  function deleteCustomer(customer) {
+  // Kunden löschen
+  async function deleteCustomer(customer) {
     const confirmed = window.confirm(
-      `Möchtest du den Kunden „${customer.name}“ wirklich löschen? Seine Ansprechpartner werden ebenfalls gelöscht.`,
+      `Möchtest du den Kunden „${customer.name}“ wirklich löschen? Seine Ansprechpartner werden ebenfalls gelöscht.`
     );
 
     if (!confirmed) return;
 
-    setCustomers((current) =>
-      current.filter((item) => item.id !== customer.id),
-    );
+    setError("");
 
-    if (selectedCustomerId === customer.id) {
-      const nextCustomer = customers.find((item) => item.id !== customer.id);
-      setSelectedCustomerId(nextCustomer?.id ?? null);
+    try {
+      await api.deleteCustomer(customer.id);
+
+      const updatedCustomers = await loadCustomers();
+
+      if (selectedCustomerId === customer.id) {
+        setSelectedCustomerId(updatedCustomers[0]?.id ?? null);
+      }
+    } catch (err) {
+      setError(`Löschen fehlgeschlagen: ${err.message}`);
     }
   }
 
-  function deleteContact(contact) {
+  // Ansprechpartner löschen
+  async function deleteContact(contact) {
     const confirmed = window.confirm(
-      `Möchtest du ${contact.firstName} ${contact.lastName} wirklich löschen?`,
+      `Möchtest du ${contact.firstName} ${contact.lastName} wirklich löschen?`
     );
 
-    if (!confirmed || selectedCustomerId === null) return;
+    if (!confirmed) return;
 
-    setCustomers((current) =>
-      current.map((customer) =>
-        customer.id === selectedCustomerId
-          ? {
-              ...customer,
-              contacts: customer.contacts.filter(
-                (item) => item.id !== contact.id,
-              ),
-            }
-          : customer,
-      ),
+    setError("");
+
+    try {
+      await api.deleteContact(contact.id);
+      await loadCustomers();
+    } catch (err) {
+      setError(`Löschen fehlgeschlagen: ${err.message}`);
+    }
+  }
+
+  if (loading) {
+    return (
+      <Container className="py-5">
+        <p>Kundendaten werden geladen ...</p>
+      </Container>
     );
   }
 
@@ -184,10 +212,27 @@ function Verwaltung() {
           variant="primary"
           onClick={() => openModal("customer")}
           className="mt-3 mt-lg-0"
+          disabled={saving}
         >
           <span aria-hidden="true">＋ </span>Kunde hinzufügen
         </Button>
       </div>
+
+      {error && (
+        <Alert
+          variant="danger"
+          dismissible
+          onClose={() => setError("")}
+        >
+          {error}
+        </Alert>
+      )}
+
+      {saving && (
+        <Alert variant="info">
+          Änderungen werden gespeichert ...
+        </Alert>
+      )}
 
       <Row className="g-3 mb-4">
         <Col sm={6} lg={4}>
@@ -208,8 +253,9 @@ function Verwaltung() {
               <div>Ansprechpartner</div>
               <div>
                 {customers.reduce(
-                  (total, customer) => total + customer.contacts.length,
-                  0,
+                  (total, customer) =>
+                    total + (customer.contacts?.length ?? 0),
+                  0
                 )}
               </div>
               <div className="small text-body-secondary">
@@ -218,7 +264,6 @@ function Verwaltung() {
             </Card.Body>
           </Card>
         </Col>
-
       </Row>
 
       <Row className="g-4">
@@ -227,11 +272,14 @@ function Verwaltung() {
             <Card.Body className="p-3 p-lg-4">
               <div className="d-flex align-items-center justify-content-between mb-3">
                 <h2 className="h5 fw-bold mb-0">Deine Kunden</h2>
-                <Badge bg="secondary" pill>{filteredCustomers.length}</Badge>
+                <Badge bg="secondary" pill>
+                  {filteredCustomers.length}
+                </Badge>
               </div>
 
               <InputGroup className="mb-3">
-                <InputGroup.Text aria-hidden="true">⌕</InputGroup.Text>
+                <InputGroup.Text aria-hidden="true">
+                </InputGroup.Text>
                 <Form.Control
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
@@ -244,7 +292,9 @@ function Verwaltung() {
                 {filteredCustomers.length === 0 ? (
                   <div className="py-4 text-center">
                     <div className="fs-3 mb-2">⌕</div>
-                    <div className="fw-semibold">Keine Kunden gefunden</div>
+                    <div className="fw-semibold">
+                      Keine Kunden gefunden
+                    </div>
                     <div className="small text-body-secondary mt-1">
                       Ändere deinen Suchbegriff oder lege einen Kunden an.
                     </div>
@@ -258,10 +308,9 @@ function Verwaltung() {
                       onClick={() => setSelectedCustomerId(customer.id)}
                     >
                       <span>
-                        {customer.name} {" in "}
+                        {customer.name} in{" "}
                         {customer.ort || "Kein Ort angegeben"}
                       </span>
-
                     </button>
                   ))
                 )}
@@ -271,6 +320,7 @@ function Verwaltung() {
                 variant="outline-primary"
                 className="w-100 mt-3"
                 onClick={() => openModal("customer")}
+                disabled={saving}
               >
                 ＋ Weiteren Kunden anlegen
               </Button>
@@ -282,13 +332,16 @@ function Verwaltung() {
           {!selectedCustomer ? (
             <Card className="h-100">
               <Card.Body className="text-center py-5">
-                <h2 className="h5 fw-bold">Noch kein Kunde ausgewählt</h2>
+                <h2 className="h5 fw-bold">
+                  Noch kein Kunde ausgewählt
+                </h2>
                 <p className="text-body-secondary">
                   Wähle links einen Kunden aus oder lege einen neuen an.
                 </p>
                 <Button
                   variant="primary"
                   onClick={() => openModal("customer")}
+                  disabled={saving}
                 >
                   Ersten Kunden anlegen
                 </Button>
@@ -299,24 +352,25 @@ function Verwaltung() {
               <Card className="mb-4">
                 <Card.Body className="p-3 p-lg-4">
                   <div className="d-flex flex-wrap justify-content-between gap-3">
-                    <div className="d-flex gap-3">
-                      <div>
-                        <div className="small text-body-secondary mb-1">
-                          KUNDENPROFIL
-                        </div>
-                        <h2 className="h4 fw-bold mb-1">
-                          {selectedCustomer.name}
-                        </h2>
-                        <div className="text-body-secondary small">
-                          {[
-                            selectedCustomer.strasse,
-                            [selectedCustomer.plz, selectedCustomer.ort]
-                              .filter(Boolean)
-                              .join(" "),
+                    <div>
+                      <div className="small text-body-secondary mb-1">
+                        KUNDENPROFIL
+                      </div>
+                      <h2 className="h4 fw-bold mb-1">
+                        {selectedCustomer.name}
+                      </h2>
+                      <div className="text-body-secondary small">
+                        {[
+                          selectedCustomer.strasse,
+                          [
+                            selectedCustomer.plz,
+                            selectedCustomer.ort,
                           ]
                             .filter(Boolean)
-                            .join(", ") || "Keine Adresse hinterlegt"}
-                        </div>
+                            .join(" "),
+                        ]
+                          .filter(Boolean)
+                          .join(", ") || "Keine Adresse hinterlegt"}
                       </div>
                     </div>
 
@@ -324,6 +378,7 @@ function Verwaltung() {
                       <Button
                         size="sm"
                         variant="outline-primary"
+                        disabled={saving}
                         onClick={() =>
                           openModal("customer", selectedCustomer)
                         }
@@ -333,6 +388,7 @@ function Verwaltung() {
                       <Button
                         size="sm"
                         variant="outline-danger"
+                        disabled={saving}
                         onClick={() => deleteCustomer(selectedCustomer)}
                       >
                         Löschen
@@ -367,7 +423,9 @@ function Verwaltung() {
                 <Card.Body className="p-3 p-lg-4">
                   <div className="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
                     <div>
-                      <h2 className="h5 fw-bold mb-1">Ansprechpartner</h2>
+                      <h2 className="h5 fw-bold mb-1">
+                        Ansprechpartner
+                      </h2>
                       <p className="small text-body-secondary mb-0">
                         Kontakte von {selectedCustomer.name}
                       </p>
@@ -376,13 +434,14 @@ function Verwaltung() {
                     <Button
                       variant="primary"
                       size="sm"
+                      disabled={saving}
                       onClick={() => openModal("contact")}
                     >
                       ＋ Ansprechpartner
                     </Button>
                   </div>
 
-                  {selectedCustomer.contacts.length === 0 ? (
+                  {(selectedCustomer.contacts ?? []).length === 0 ? (
                     <div className="text-center py-5">
                       <h3 className="h6 fw-bold">
                         Noch keine Ansprechpartner
@@ -392,6 +451,7 @@ function Verwaltung() {
                       </p>
                       <Button
                         variant="outline-primary"
+                        disabled={saving}
                         onClick={() => openModal("contact")}
                       >
                         Ansprechpartner hinzufügen
@@ -412,15 +472,15 @@ function Verwaltung() {
                           {selectedCustomer.contacts.map((contact) => (
                             <tr key={contact.id}>
                               <td>
-                                <div className="d-flex align-items-center gap-2">
-                                  <span className="fw-semibold">
-                                    {contact.firstName} {contact.lastName}
-                                  </span>
-                                </div>
+                                <span className="fw-semibold">
+                                  {contact.firstName} {contact.lastName}
+                                </span>
                               </td>
                               <td>
                                 {contact.role || (
-                                  <span className="text-body-secondary">–</span>
+                                  <span className="text-body-secondary">
+                                    –
+                                  </span>
                                 )}
                               </td>
                               <td>
@@ -444,6 +504,7 @@ function Verwaltung() {
                                   <Button
                                     size="sm"
                                     variant="outline-primary"
+                                    disabled={saving}
                                     aria-label={`${contact.firstName} ${contact.lastName} bearbeiten`}
                                     onClick={() =>
                                       openModal("contact", contact)
@@ -454,6 +515,7 @@ function Verwaltung() {
                                   <Button
                                     size="sm"
                                     variant="outline-danger"
+                                    disabled={saving}
                                     aria-label={`${contact.firstName} ${contact.lastName} löschen`}
                                     onClick={() => deleteContact(contact)}
                                   >
@@ -473,12 +535,6 @@ function Verwaltung() {
           )}
         </Col>
       </Row>
-
-      <Alert variant="info" className="mt-4 mb-0 small">
-        <strong>Hinweis:</strong> Diese Version nutzt noch Beispieldaten im Browser.
-        Beim Neuladen werden Änderungen zurückgesetzt. Die dauerhafte Speicherung
-        erfolgt später über die C#-API und PostgreSQL.
-      </Alert>
 
       <CustomerModal
         show={modal.show}
