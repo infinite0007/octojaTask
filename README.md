@@ -21,9 +21,9 @@ Vor dem Start müssen folgende Programme installiert sein:
 Die Installationen können über folgende Befehle überprüft werden:
 
 ```cmd
-node --version  (v.11.19.1 bei mir)
-npm --version
-dotnet --version
+node --version      (v.24.22.1 bei mir)
+npm --version       (v.11.19.1 bei mir)
+dotnet --version    (v.10.0.403 bei mir)
 ```
 
 ## 1. PostgreSQL einrichten
@@ -86,35 +86,36 @@ dotnet user-secrets set "ConnectionStrings:OctojaDb" "Host=localhost;Port=5432;D
 
 Falls PostgreSQL mit einem anderen Port oder Benutzernamen eingerichtet wurde, müssen die entsprechenden Angaben angepasst werden.
 
-### Entity Framework Core einrichten
+### Datenbank erstellen
 
-Falls das Entity-Framework-CLI-Tool noch nicht installiert ist:
+Die Datenbanktabellen werden beim ersten Start des Backends automatisch erstellt, sofern die Datenbank noch keine Tabellen enthält. Dafür wird EnsureCreatedAsync() in Program.cs verwendet. Für den aktuellen Testbetrieb sind keine Migrationen erforderlich.
+
+Im Backend-Verzeichnis Backend\Octoja.Api folgende Befehle ausführen:
 
 ```cmd
-dotnet tool install --global dotnet-ef --version 10.0.4
+dotnet restore
+dotnet build
+dotnet run
 ```
 
-Falls es bereits installiert ist, kann es aktualisiert werden:
+Info:
+dotnet restore stellt die benötigten Abhängigkeiten wieder her.
+dotnet build überprüft, ob das Projekt erfolgreich kompiliert werden kann.
+dotnet run startet das Backend und erstellt bei einer leeren Datenbank automatisch die Tabellen.
 
+Wichtig für später:
+Wenn später neue Modelle oder Eigenschaften hinzukommen, kann die Datenbank mithilfe von Entity-Framework-Migrationen aktualisiert werden. Dafür sind folgende Befehle vorgesehen:
 ```cmd
-dotnet tool update --global dotnet-ef --version 10.0.4
-```
-
-Die benötigten NuGet-Pakete sind im Projekt hinterlegt und werden mit `dotnet restore` wiederhergestellt.
-
-### Datenbanktabellen erstellen
-
-Die Migrationen auf die Datenbank anwenden:
-
-```cmd
+dotnet ef migrations add ModellUpdate
 dotnet ef database update
 ```
+ModellUpdate kann durch einen passenden Namen für die jeweilige Änderung ersetzt werden. Der erste Befehl erstellt eine Migration, der zweite wendet sie auf die Datenbank an.
 
-Dieser Befehl erstellt die Tabellen entsprechend den vorhandenen Migrationen.
+Achtung: Für diesen Testbetrieb ist das nicht notwendig. Die Umstellung von EnsureCreatedAsync() auf Migrationen muss vorher vorbereitet werden, da beide Verfahren nicht ohne Weiteres gemeinsam dieselbe Datenbank verwalten. dotnet-ef muss für die Migrationen außerdem installiert sein.
 
 ### Backend starten
 
-Das Backend starten:
+Das Backend wird immer mit nachfolgendem Befehl gestartet:
 
 ```cmd
 dotnet run
@@ -194,7 +195,7 @@ Die Daten werden über das Frontend eingegeben und vom Backend in PostgreSQL ges
 - Kunden können erstellt, angezeigt, bearbeitet und gelöscht werden.
 - Ansprechpartner können einem Kunden zugeordnet und verwaltet werden.
 - Änderungen bleiben nach einem Neustart der Anwendung in der Datenbank erhalten.
-- Beim Löschen eines Kunden werden die zugehörigen Ansprechpartner ebenfalls gelöscht.
+- Beim Löschen eines Kunden werden die zugehörigen Ansprechpartner ebenfalls gelöscht (Cascade).
 
 Die API-Endpunkte sind im Backend in `Program.cs` definiert.
 
@@ -255,7 +256,6 @@ Terminal 1 – Backend:
 
 ```cmd
 cd Backend\Octoja.Api
-dotnet ef database update (falls noch nicht geschehen)
 dotnet run
 ```
 
@@ -267,8 +267,6 @@ npm run dev
 ```
 
 Anschließend die vom Frontend ausgegebene lokale Adresse im Browser öffnen.
-
-Die PostgreSQL-Datenbank muss ebenfalls laufen. Die Datenbankverbindung muss einmalig eingerichtet und die Migration müssen angewendet worden sein.
 
 ## 9. Häufige Probleme
 
@@ -284,12 +282,13 @@ Die PostgreSQL-Datenbank muss ebenfalls laufen. Die Datenbankverbindung muss ein
 Im Backend-Verzeichnis folgenden Befehl ausführen:
 
 ```cmd
-dotnet ef database update
+dotnet restore
+dotnet build
 dotnet run
 ```
 
 ### Frontend
 
-- Sicherstellen, dass node_modules Ordner nach "npm install" gestartet wurde.
+- Sicherstellen, dass node_modules Ordner nach "npm install" erscheint.
 - Schauen dass das Frontend läuft nach: "npm run dev"
 - Die Basisadresse in `src/services/api.js` überprüfen.
