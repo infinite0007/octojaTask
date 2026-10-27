@@ -147,3 +147,22 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Build-Dateien .NET
+**/bin/
+**/obj/
+
+# Lokale IDE-Dateien
+.vs/
+*.user
+*.suo
+
+# Lokale Konfiguration und Geheimnisse
+appsettings.Development.json
+appsettings.Local.json
+.env
+.env.*
+
+# Zertifikate
+*.pfx
+*.p12
