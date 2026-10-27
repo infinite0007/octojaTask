@@ -1,5 +1,6 @@
 # octojaTask – Kundenverwaltung
 Eine Webanwendung zur Kunden- und Ansprechpartnerverwaltung, bestehend aus einem React-Frontend mit react Bootstrap, einer REST-API mit ASP.NET Core und C# auf Basis von .NET 10 sowie einer PostgreSQL-Datenbank. Der Datenbankzugriff erfolgt über Entity Framework Core mit dem PostgreSQL-Provider Npgsql. Die Anwendung ermöglicht das Anlegen, Anzeigen, Bearbeiten und Löschen von Kunden sowie die Verwaltung zugehöriger Ansprechpartner. Zwischen Kunden und Ansprechpartnern besteht eine 1:N-Beziehung.
+
 ![Octoja Screenshot](https://i.postimg.cc/Kvvrdhf4/octojaimg.png)
 
 ## Verwendete Technologien
